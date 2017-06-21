@@ -1,69 +1,33 @@
 console.log('mvvm')
 
-let uid = 0
-export default class MVVM {
+class Mvvm {
   constructor (options) {
-    this.$options = options
-    this.$options.delimiters = this.$options.delimiters || ['{{', '}}']
-    this._uid = uid++
-    this._watchers = []
-    callHook(this, 'beforeCreate')
+    this.$options = options || {}
+    let data = this._data = this.$options.data 
+
+    // 实现vm.xxx => vm._data.xxx
+    Object.keys(data).forEach((key) => {
+      this._proxyData(key)
+    })
+
+    this._initComputed()
+
+    this.$compile = new Compiler(options.el || document.body, this)
   }
 
-  static use (plugin) {
-    plugin && plugin.install && plugin.install.call(this, MVVM)
+  $watch (key, callback, options) {
+    new Watcher(this, key, callback)
   }
 
-  static $set () {}
+  _proxyData () {}
 
-  static $delete () {}
-
-  $mount (el) {}
-
-  $watch () {}
-
-  $forceUpdate () {}
-
-  $destroy () {}
-
-  _render () {}
-
-  _update () {}
-
-  _h () {}
-
-  _createComponent () {}
-
-  _l () {}
+  _initComputed () {}
 }
 
-window.MVVM = MVVM
+class Observer {}
 
+class Compiler {}
 
-// 获取data
-function mergeOptions (options) {
-  let opt = Object.assign({}, options)
-  let data = opt.data
-  if (isFunction(data)) {
-    opt.data = data()
-  }
-  return opt
-}
+class Watcher {}
 
-// 生命周期钩子函数
-function callHook (vm, hook) {
-  const handlers = vm.$options[hook]
-  if (handlers) {
-    if (Array.isArray(handlers)) {
-      for (let i = 0; i < handlers.length; i++) {
-        try {
-          handlers[i].call(vm)
-        } catch (e) {
-          handleError(e, vm, `${hook} hook`)
-        }
-      }
-    } else {
-      handlers.call(vm)
-    }
-  }
-}
+window.Mvvm = Mvvm
